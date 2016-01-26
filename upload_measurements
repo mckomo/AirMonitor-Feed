@@ -1,0 +1,111 @@
+#!/usr/bin/env ruby
+
+$LOAD_PATH.unshift(File.dirname(__FILE__))
+
+require 'rubygems'
+require 'bundler/setup'
+
+require 'active_support/all'
+require 'clamp'
+require 'faraday'
+require 'faraday_middleware'
+require 'json'
+require 'pp'
+
+require 'lib/time_range'
+require 'lib/air_monitor'
+require 'lib/remote_source'
+
+Clamp do
+
+  Time.zone = 'CET'
+
+  option(['-f', '--from'], :from, 'Left bound of measurement time', default: Time.current) { |f| Time.zone.parse(f) }
+  option(['-t', '--to'], :to, 'Right bound of measurement time', default: Time.current) { |t| Time.zone.parse(t) }
+
+  def execute
+    time_range.step(1.hour).each { |time|
+      upload_measurements_at(time)
+    }
+  end
+
+  private
+
+  def upload_measurements_at(time)
+    AirMonitor::Stations.all.each do |station|
+
+      response = RemoteSource::Measurements.request(station_id: station.id, date: time)
+
+      unless response.success?
+        puts "Failed to request measurements at #{time} from station with code #{station.code}" and next
+      end
+
+      extract(response.body).select { |mp|
+        mp.
+        true # TODO
+      }.each { |mp|
+        mp[:station_code] = station.code
+      }.map { |mp|
+        transform(mp)
+      }.tap { |ml|
+        p ml.count
+      }.each { |m|
+        p m
+        # load(m)
+      }
+
+    end
+  end
+
+  def extract(daily_measurements)
+
+    measurements_list = daily_measurements
+        .try(:fetch, 'data')
+        .try(:fetch, 'series')
+
+    return {} if measurements_list.nil?
+
+    supported_subject_codes.map { |sc|
+
+      measurements_list
+          .detect { |m| m['paramId'].eql?(sc.downcase) }
+          .try(:fetch, 'data')
+          .try(:map) { |m| { value: m[1],
+                             time: m[0],
+                             subject_code: sc } }
+
+    }.flatten
+
+  end
+
+  def transform(params)
+    AirMonitor::Measurement.new(value: params[:value].to_f,
+                    time: Time.zone.at(params[:time].to_i),
+                    source: 'http://monitoring.krakow.pios.gov.pl',
+                    subject_code: params[:subject_code],
+                    station_code: params[:station_code])
+  end
+
+  def load(measurement)
+    p AirMonitor::Measurements.post(measurement).body
+  end
+
+  def time_range
+    @time_range ||= TimeRange.new(starts, ends)
+  end
+
+  def starts
+    from.beginning_of_hour
+  end
+
+  def ends
+    to.end_of_hour
+  end
+
+  def supported_subject_codes
+    @subjects ||= ['NO2', 'NO', 'NOx', 'CO', 'PM10', 'PM2.5']
+  end
+
+end
+
+
