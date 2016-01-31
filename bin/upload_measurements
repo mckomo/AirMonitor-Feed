@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-$LOAD_PATH.unshift(File.dirname(__FILE__))
+$LOAD_PATH.unshift(File.expand_path('..', File.dirname(__FILE__)))
 
 require 'rubygems'
 require 'bundler/setup'
@@ -16,42 +16,42 @@ require 'lib/time_range'
 require 'lib/air_monitor'
 require 'lib/remote_source'
 
+Time.zone = 'CET'
+
 Clamp do
 
-  Time.zone = 'CET'
+  SUPPORTED_SUBJECT_CODES = %w{NO2 NO NOx CO PM10 PM2.5}
 
   option(['-f', '--from'], :from, 'Left bound of measurement time', default: Time.current) { |f| Time.zone.parse(f) }
   option(['-t', '--to'], :to, 'Right bound of measurement time', default: Time.current) { |t| Time.zone.parse(t) }
 
   def execute
-    time_range.step(1.hour).each { |time|
-      upload_measurements_at(time)
+    time_range.split_by_calendar_days.each { |d|
+      upload_measurements_in(d)
     }
   end
 
   private
 
-  def upload_measurements_at(time)
-    AirMonitor::Stations.all.each do |station|
+  def upload_measurements_in(time_range)
+    AirMonitor::Stations.supported.each do |station|
 
-      response = RemoteSource::Measurements.request(station_id: station.id, date: time)
+      response = RemoteSource::Measurements.request(station_id: station.id, date: time_range.begin)
 
       unless response.success?
         puts "Failed to request measurements at #{time} from station with code #{station.code}" and next
       end
 
-      extract(response.body).select { |mp|
-        mp.
-        true # TODO
-      }.each { |mp|
+      extract(response.body).each { |mp|
         mp[:station_code] = station.code
       }.map { |mp|
         transform(mp)
-      }.tap { |ml|
-        p ml.count
-      }.each { |m|
-        p m
-        # load(m)
+      }.select { |m|
+        time_range.cover?(m.time)
+      }.lazy.map { |m|
+        load(m)
+      }.each { |r|
+        log(r)
       }
 
     end
@@ -65,7 +65,7 @@ Clamp do
 
     return {} if measurements_list.nil?
 
-    supported_subject_codes.map { |sc|
+    SUPPORTED_SUBJECT_CODES.map { |sc|
 
       measurements_list
           .detect { |m| m['paramId'].eql?(sc.downcase) }
@@ -87,7 +87,28 @@ Clamp do
   end
 
   def load(measurement)
-    p AirMonitor::Measurements.post(measurement).body
+
+    response = AirMonitor::Measurements.post(measurement)
+
+    {
+        measurement: measurement,
+        response: response
+    }
+
+  end
+
+  def log(result)
+
+    measurement, response= result[:measurement], result[:response]
+
+    puts [
+        measurement.time,
+        measurement.station_code,
+        measurement.subject_code,
+        response.status,
+        response.success? ? '' : response.body
+    ].join(';')
+
   end
 
   def time_range
@@ -100,10 +121,6 @@ Clamp do
 
   def ends
     to.end_of_hour
-  end
-
-  def supported_subject_codes
-    @subjects ||= ['NO2', 'NO', 'NOx', 'CO', 'PM10', 'PM2.5']
   end
 
 end
