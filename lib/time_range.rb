@@ -2,7 +2,7 @@ module TimeRefinements
 
   REFINE_TARGETS = [Time, ActiveSupport::TimeWithZone]
 
-  module Extensions
+  module TimeExtension
     def next_day_beginning
       (self + 1.day).beginning_of_day
     end
@@ -10,7 +10,7 @@ module TimeRefinements
 
   REFINE_TARGETS.each do |klass|
     refine klass do
-      include Extensions
+      include TimeExtension
     end
   end
 
@@ -35,12 +35,18 @@ class TimeRange < Range
 
   end
 
+  private
+
   def min(a, b)
     a < b ? a : b
   end
 
-  def step(interval)
-    super.lazy.map { |i| Time.zone.at(i) }
-  end
+  # def step(interval)
+  #   super.lazy.map { |i| Time.zone.at(i) }
+  # end
 
+end
+
+def TimeRange(start, stop)
+  TimeRange.new(start, stop)
 end

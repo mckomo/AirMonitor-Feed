@@ -1,44 +1,91 @@
+require 'lib/wios'
 require 'lib/air_monitor/resource'
 require 'lib/air_monitor/station'
-require 'lib/air_monitor/stations'
+require 'lib/air_monitor/channel'
 require 'lib/air_monitor/measurement'
-require 'lib/air_monitor/measurements'
+require 'lib/air_monitor/api'
 
 module AirMonitor
 
-  class << self  
+  class << self
 
-    def post(endpoint, resource)
-      connection.post(endpoint, resource.params) do |req|
-        req.headers['Authorization'] = "Bearer #{authorization_token}"
+    def upload_measurements_in(time_range)
+
+      Station.all.each do |station|
+
+        response = WIOS::Measurement.request(station: station, date: time_range.begin)
+
+        unless response.success?
+          puts "Failed to request measurements at #{time} from station with code #{station.code}" and next
+        end
+
+        extract_measurements_for(station.channels, response.body)
+            .map { |mp| transform(mp) }
+            .select { |m| time_range.cover?(m.time) }
+            .lazy
+            .map { |m| load(m) }
+            .each { |r| log(r) }
+
       end
+
     end
 
-    private
-    
-    def connection
-      @connection ||= Faraday.new(url: 'https://air.knp-dev.org') { |conn|
-        conn.request :json
-        conn.response :json
-        conn.adapter  Faraday.default_adapter
+    def extract_measurements_for(channels, response)
+
+      measurements_by_subject = response
+                                    .fetch('data')
+                                    .fetch('series')
+                                    .map { |s| [s['paramId'], s['data']] }
+                                    .to_h
+
+      return {} if measurements_by_subject.nil?
+
+      channels.map { |channel|
+
+        measurements_by_subject
+            .try(:fetch, channel.subject_code.downcase)
+            .try(:map) { |m| {value: m[1], time: m[0], channel: channel} }
+
+      }.compact.flatten
+
+    end
+
+    def transform(params)
+
+      value = params[:value].to_f
+      channel = params[:channel]
+      time = Time.zone.at(params[:time].to_i)
+
+      AirMonitor::Measurement.new(
+          value: value,
+          time: time,
+          channel: channel,
+          source: 'http://monitoring.krakow.pios.gov.pl')
+    end
+
+    def load(measurement)
+
+      response = AirMonitor::Measurement.post(measurement)
+
+      {
+          measurement: measurement,
+          response: response
       }
-    end
-    
-    def authorization_token
-      @token ||= authorize or raise 'Authorization failed'
-    end
-    
-    def authorize
-      connection
-          .post('/api/v1/auth/tokens', auth: auth_params)
-          .body
-          .try(:fetch, 'token', nil)
+
     end
 
-    def auth_params
-      { email: 'mckomo@gmail.com', password: 'Koksik88' }
+    def log(result)
+
+      measurement, response= result[:measurement], result[:response]
+
+      puts [
+               measurement.time,
+               measurement.channel.code,
+               response.status,
+               response.success? ? '' : response.body
+           ].join(';')
+
     end
-    
+
   end
-
 end
