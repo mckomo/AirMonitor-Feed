@@ -42,6 +42,7 @@ module AirMonitor
 
       channels.map { |channel|
 
+        pp
         measurements_by_subject
             .try(:fetch, channel.subject_code.downcase)
             .try(:map) { |m| {value: m[1], time: m[0], channel: channel} }

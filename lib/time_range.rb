@@ -41,10 +41,6 @@ class TimeRange < Range
     a < b ? a : b
   end
 
-  # def step(interval)
-  #   super.lazy.map { |i| Time.zone.at(i) }
-  # end
-
 end
 
 def TimeRange(start, stop)
