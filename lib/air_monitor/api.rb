@@ -1,6 +1,9 @@
 module AirMonitor
 
   class API
+
+    URL = 'https://air-monitor.pl'
+
     class << self
 
       def post(endpoint, resource)
@@ -12,7 +15,7 @@ module AirMonitor
       private
 
       def connection
-        @connection ||= Faraday.new(url: 'https://air.knp-dev.org') { |conn|
+        @connection ||= Faraday.new(url: URL, ssl: { verify: false }) { |conn|
           conn.request :json
           conn.response :json
           conn.adapter Faraday.default_adapter
