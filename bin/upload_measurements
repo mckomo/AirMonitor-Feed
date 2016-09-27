@@ -23,8 +23,8 @@ Clamp do
   option(['-t', '--to'], :to, 'Right bound of measurement time', default: Time.current) { |t| Time.zone.parse(t) }
 
   def execute
-    time_range.split_by_calendar_days.each { |tr|
-      AirMonitor.upload_measurements_in(tr)
+    time_range.split_by_calendar_days.each { |day|
+      AirMonitor.upload_measurements_on(day)
     }
   end
 
