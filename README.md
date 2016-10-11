@@ -4,7 +4,7 @@ Data feed for [AirMonitor](https://air-monitor.pl) project.
 
 ### Instalation
 
-Copy repository and install dependency gems with Bundler:
+Copy repository and install dependency gems with [Bundler](http://bundler.io):
 
 ```bash
 git clone https://github.com/mckomo/AirMonitor-Feed && cd AirMonitor-Feed && bundle install
@@ -15,6 +15,14 @@ Alternatively you can install `upload_measurements` globally:
 ```bash
 ln -s bin/upload_measurements /usr/local/bin/upload_measurements
 ```
+
+Lastly, create `.env` file in the project root with following contents:
+
+```bash
+AUTHENTICATION_TOKEN=past_here_your_access_token
+```
+
+Now, you are ready to go :thumbsup:.
 
 ### Usage:
 
