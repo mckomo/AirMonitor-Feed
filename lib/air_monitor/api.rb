@@ -2,13 +2,13 @@ module AirMonitor
 
   class API
 
-    URL = 'https://air-monitor.pl'
+    URL = ENV['API_ULR'] || 'https://air-monitor.pl/'
 
     class << self
 
       def post(endpoint, resource)
         connection.post(endpoint, resource.params) do |req|
-          req.headers['Authorization'] = "Bearer #{authorization_token}"
+          req.headers['Authorization'] = "Bearer #{authentication_token}"
         end
       end
 
@@ -22,8 +22,12 @@ module AirMonitor
         }
       end
 
-      def authorization_token
-        @token ||= 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI2ZTNmMTE5Yy1hNGFkLTRiZmQtOTNiZi05ZmZkYzkwZDIxZDAifQ.vAbtoXwCsFrtFwuXk5l3JtXzUCkUarRNSDXbB28N6rs'
+      def authentication_token
+        if ENV['AUTHENTICATION_TOKEN'].nil?
+          raise 'Cannot continue without authentication token!'
+        else
+          ENV['AUTHENTICATION_TOKEN']
+        end
       end
 
     end

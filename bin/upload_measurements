@@ -11,10 +11,12 @@ require 'faraday'
 require 'faraday_middleware'
 require 'json'
 require 'pp'
+require 'dotenv'
 
 require 'lib/time_range'
 require 'lib/air_monitor'
 
+Dotenv.load
 Time.zone = 'CET'
 
 Clamp do
@@ -43,5 +45,3 @@ Clamp do
   end
 
 end
-
-
