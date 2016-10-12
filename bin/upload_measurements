@@ -16,8 +16,11 @@ require 'dotenv'
 require 'lib/time_range'
 require 'lib/air_monitor'
 
-Dotenv.load
 Time.zone = 'CET'
+
+Dotenv.load(
+  File.expand_path("../../.env",  File.realpath(__FILE__))
+)
 
 Clamp do
 
