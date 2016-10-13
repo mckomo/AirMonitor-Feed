@@ -1,8 +1,9 @@
+# frozen_string_literal: true
 module WIOS
-
   class API
-    class << self
+    URL = 'http://monitoring.krakow.pios.gov.pl'
 
+    class << self
       def post(endpoint, request)
         cached(request) { connection.post(endpoint, request) }
       end
@@ -18,7 +19,7 @@ module WIOS
       end
 
       def cached?(key)
-        storage.has_key?(key)
+        storage.key?(key)
       end
 
       def cache(key, value = nil)
@@ -30,14 +31,12 @@ module WIOS
       end
 
       def connection
-        @connection ||= Faraday.new(url: WIOS::URL) { |conn|
+        @connection ||= Faraday.new(url: URL) do |conn|
           conn.request :json
           conn.response :json
           conn.adapter Faraday.default_adapter
-        }
+        end
       end
-
     end
   end
-
 end

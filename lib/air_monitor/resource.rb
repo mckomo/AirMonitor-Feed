@@ -1,9 +1,8 @@
+# frozen_string_literal: true
 module AirMonitor
-
   class Resource
-
     def initialize(params)
-      params.each {|k,v| send("#{k}=",v)}
+      params.each { |k, v| send("#{k}=", v) }
     end
 
     def params
@@ -15,8 +14,5 @@ module AirMonitor
     def kind
       self.class.name.demodulize.underscore
     end
-
   end
-
 end
-
