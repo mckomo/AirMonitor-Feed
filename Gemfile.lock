@@ -7,7 +7,7 @@ GEM
       minitest (~> 5.1)
       tzinfo (~> 1.1)
     ast (2.3.0)
-    clamp (1.0.0)
+    clamp (1.0.1)
     concurrent-ruby (1.0.2)
     diff-lcs (1.2.5)
     dotenv (2.1.1)
@@ -26,7 +26,7 @@ GEM
       rspec-core (~> 3.5.0)
       rspec-expectations (~> 3.5.0)
       rspec-mocks (~> 3.5.0)
-    rspec-core (3.5.3)
+    rspec-core (3.5.4)
       rspec-support (~> 3.5.0)
     rspec-expectations (3.5.0)
       diff-lcs (>= 1.2.0, < 2.0)
@@ -51,13 +51,13 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  activesupport
-  clamp
-  dotenv
-  faraday
-  faraday_middleware
-  rspec
-  rubocop
+  activesupport (~> 5.0)
+  clamp (~> 1.0)
+  dotenv (~> 2.1)
+  faraday (~> 0.9.2)
+  faraday_middleware (~> 0.10)
+  rspec (~> 3.5)
+  rubocop (~> 0.43s)
 
 BUNDLED WITH
    1.12.5
