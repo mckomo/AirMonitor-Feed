@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
 
 $LOAD_PATH.unshift(File.expand_path('..', File.dirname(File.realpath(__FILE__))))
 
@@ -19,18 +20,17 @@ require 'lib/air_monitor'
 Time.zone = 'CET'
 
 Dotenv.load(
-  File.expand_path("../../.env",  File.realpath(__FILE__))
+  File.expand_path('../../.env',  File.realpath(__FILE__))
 )
 
 Clamp do
-
   option(['-f', '--from'], :from, 'Left bound of measurement time', default: Time.current) { |f| Time.zone.parse(f) }
   option(['-t', '--to'], :to, 'Right bound of measurement time', default: Time.current) { |t| Time.zone.parse(t) }
 
   def execute
-    time_range.split_by_calendar_days.each { |day|
+    time_range.split_by_calendar_days.each do |day|
       AirMonitor.upload_measurements_on(day)
-    }
+    end
   end
 
   private
@@ -46,5 +46,4 @@ Clamp do
   def ends
     to.end_of_hour
   end
-
 end

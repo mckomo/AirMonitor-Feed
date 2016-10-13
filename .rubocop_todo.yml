@@ -26,17 +26,8 @@ Style/Documentation:
   Exclude:
     - 'spec/**/*'
     - 'test/**/*'
-    - 'lib/air_monitor.rb'
-    - 'lib/air_monitor/api.rb'
-    - 'lib/air_monitor/channel.rb'
-    - 'lib/air_monitor/measurement.rb'
-    - 'lib/air_monitor/resource.rb'
-    - 'lib/air_monitor/station.rb'
-    - 'lib/time_range.rb'
-    - 'lib/wios/api.rb'
-    - 'lib/wios/measurement.rb'
-    - 'workers/upload_measurements_worker.rb'
-
+    - 'lib/**/*'
+    - 'workers/**/*'
 # Offense count: 1
 # Configuration parameters: MinBodyLength.
 Style/GuardClause:
