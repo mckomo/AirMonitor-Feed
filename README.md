@@ -1,5 +1,7 @@
 # AirMonitor-Feed
 
+[![Build Status](https://travis-ci.org/mckomo/AirMonitor-Feed.svg?branch=master)](https://travis-ci.org/mckomo/AirMonitor-Feed)
+
 Data feed for [AirMonitor](https://air-monitor.pl) project.
 
 ### Instalation
