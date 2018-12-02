@@ -1,11 +1,12 @@
 # frozen_string_literal: true
+
 source 'https://rubygems.org'
 
 gem 'activesupport'
-gem 'faraday'
-gem 'faraday_middleware'
 gem 'clamp'
 gem 'dotenv'
+gem 'faraday'
+gem 'faraday_middleware'
 
 group :development do
   gem 'rspec'

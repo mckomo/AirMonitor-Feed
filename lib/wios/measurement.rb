@@ -1,9 +1,10 @@
 # frozen_string_literal: true
+
 module WIOS
   class Measurement
     class << self
       def request(station)
-        API.post('/dane-pomiarowe/pobierz', query: build_query_for(station).to_json)
+        API.post('/dane-pomiarowe/pobierz', query: build_query_for(station))
       end
 
       private

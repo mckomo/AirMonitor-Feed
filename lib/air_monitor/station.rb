@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module AirMonitor
   class Station < Resource
     attr_accessor :id, :code, :name, :channels

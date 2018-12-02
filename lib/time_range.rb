@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module TimeRefinements
   REFINE_TARGETS = [Time, ActiveSupport::TimeWithZone].freeze
 

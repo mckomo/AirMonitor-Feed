@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'lib/wios'
 require 'lib/air_monitor/resource'
 require 'lib/air_monitor/station'
@@ -50,7 +51,7 @@ module AirMonitor
         value: value,
         time: time,
         channel: channel,
-        source: WIOS::URL
+        source: WIOS::API::URL
       )
     end
 

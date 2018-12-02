@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module AirMonitor
   class API
     URL = ENV['API_ULR'] || 'https://air-monitor.pl/'

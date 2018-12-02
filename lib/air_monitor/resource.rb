@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module AirMonitor
   class Resource
     def initialize(params)

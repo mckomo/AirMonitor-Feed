@@ -1,11 +1,12 @@
 # frozen_string_literal: true
+
 module WIOS
   class API
     URL = 'http://monitoring.krakow.pios.gov.pl'
 
     class << self
-      def post(endpoint, request)
-        cached(request) { connection.post(endpoint, request) }
+      def post(endpoint, payload)
+        cached(payload) { connection.post(endpoint, payload.to_json) }
       end
 
       private
